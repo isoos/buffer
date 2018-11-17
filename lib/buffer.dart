@@ -316,7 +316,7 @@ class ByteDataReader {
     _queueTotalLength += bytes.length;
   }
 
-  List<int> read(int length, {bool copy}) {
+  Uint8List read(int length, {bool copy}) {
     if (_queue.isEmpty || _queueTotalLength - _offset < length) {
       throw new StateError('Not enough bytes to read.');
     }
