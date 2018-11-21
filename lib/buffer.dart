@@ -228,6 +228,26 @@ class ByteDataWriter {
     _offset += 8;
   }
 
+  void writeInt(int byteLength, int value, [Endian endian]) {
+    switch (byteLength) {
+      case 1:
+        writeInt8(value);
+        break;
+      case 2:
+        writeInt16(value, endian);
+        break;
+      case 4:
+        writeInt32(value, endian);
+        break;
+      case 8:
+        writeInt64(value, endian);
+        break;
+      default:
+        throw new ArgumentError(
+            'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
+    }
+  }
+
   void writeUint8(int value) {
     _init(1);
     _data.setUint8(_offset, value);
@@ -250,6 +270,26 @@ class ByteDataWriter {
     _init(8);
     _data.setUint64(_offset, value, endian ?? this.endian);
     _offset += 8;
+  }
+
+  void writeUint(int byteLength, int value, [Endian endian]) {
+    switch (byteLength) {
+      case 1:
+        writeUint8(value);
+        break;
+      case 2:
+        writeUint16(value, endian);
+        break;
+      case 4:
+        writeUint32(value, endian);
+        break;
+      case 8:
+        writeUint64(value, endian);
+        break;
+      default:
+        throw new ArgumentError(
+            'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
+    }
   }
 
   /// Concatenate the byte arrays and return them as a single unit.
@@ -391,6 +431,22 @@ class ByteDataReader {
     return value;
   }
 
+  int readInt(int byteLength, [Endian endian]) {
+    switch (byteLength) {
+      case 1:
+        return readInt8();
+      case 2:
+        return readInt16(endian);
+      case 4:
+        return readInt32(endian);
+      case 8:
+        return readInt64(endian);
+      default:
+        throw new ArgumentError(
+            'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
+    }
+  }
+
   int readUint8() {
     _init(1);
     final value = _data.getUint8(_offset);
@@ -417,5 +473,21 @@ class ByteDataReader {
     final value = _data.getUint64(_offset, endian ?? this.endian);
     _offset += 8;
     return value;
+  }
+
+  int readUint(int byteLength, [Endian endian]) {
+    switch (byteLength) {
+      case 1:
+        return readUint8();
+      case 2:
+        return readUint16(endian);
+      case 4:
+        return readUint32(endian);
+      case 8:
+        return readUint64(endian);
+      default:
+        throw new ArgumentError(
+            'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
+    }
   }
 }
