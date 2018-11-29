@@ -56,7 +56,7 @@ void main() {
       expect(f, completion([$f, $o, $o, $b, $a]));
     });
 
-    test('subsequent reads', () async {
+    test('subsequent reads', () {
       var reader = new ByteStreamReader();
       var f = reader.consume(2);
       var g = reader.consume(4);

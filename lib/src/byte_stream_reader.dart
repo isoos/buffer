@@ -103,15 +103,11 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
       int index = 0;
 
       // Complete any possible awaiters.
-      if (_awaiterQueue.isNotEmpty) print('Read $buf, q: $_awaiterQueue');
-      while (_awaiterQueue.isNotEmpty && index < buf.length - 1) {
+      while (_awaiterQueue.isNotEmpty && index <= buf.length - 1) {
         var top = _awaiterQueue.first;
-        //print(
-        //    'want ${top.remaining} from ${top.fillLength}; top: ${top.builder.toBytes()}, buf: $buf (${buf.hashCode})');
-        //print('buf as str: ${new String.fromCharCodes(buf)}');
-        //print('i = $index/${buf.length - 1}');
 
         // Dump out enqueued bytes into awaiters.
+
         while (_byteQueue.isNotEmpty && top.remaining > 0) {
           var topBytes = _byteQueue.removeFirst();
 
@@ -144,8 +140,6 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
 
         // If the buffer has >= the size, add the whole thing.
         else if (top.remaining >= buf.length) {
-          //print(
-          //    'Dumping all! ${buf.length} byte(s) into ${top.remaining}/${top.fillLength}!!');
           top.builder.add(buf);
 
           // Remove the awaiter if it's completed.
@@ -161,7 +155,6 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
         else {
           var out =
               new Uint8List.view(buf.buffer, buf.offsetInBytes, top.remaining);
-          //print('a awaiting ${top.remaining} from ${top.fillLength}; o: $out');
           index += top.remaining;
           top.builder.add(out);
 
@@ -169,7 +162,6 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
           if (top.remaining == 0) {
             _awaiterQueue.removeFirst();
             top.completer.complete(castBytes(top.builder.toBytes()));
-            //print('boom');
           } else {
             buf = new Uint8List.view(buf.buffer, buf.offsetInBytes + index);
           }
@@ -180,16 +172,12 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
                 new Uint8List.view(buf.buffer, buf.offsetInBytes + index);
             buf = leftover;
           }
-
-          //print('Index is now $index; buf is now $buf (${buf.hashCode})');
         }
       }
 
       // Enqueue all leftover data.
-      //print('Final i: $index');
       if (buf.isNotEmpty) {
         var leftover = buf;
-        //print('Leftover: $leftover (${new String.fromCharCodes(leftover)})');
         _byteQueue.addLast(leftover);
       }
     });
