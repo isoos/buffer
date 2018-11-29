@@ -103,6 +103,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
       int index = 0;
 
       // Complete any possible awaiters.
+      if (_awaiterQueue.isNotEmpty) print('Read $buf, q: $_awaiterQueue');
       while (_awaiterQueue.isNotEmpty && index < buf.length - 1) {
         var top = _awaiterQueue.first;
         //print(
@@ -215,4 +216,9 @@ class _ByteStreamReaderAwaiter {
   _ByteStreamReaderAwaiter(this.stackTrace, this.fillLength);
 
   int get remaining => fillLength - builder.length;
+
+  @override
+  String toString() {
+    return 'Awaiting $remaining/$fillLength';
+  }
 }
