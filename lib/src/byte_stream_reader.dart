@@ -18,13 +18,68 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
 
   ByteStreamReader({this.endian: Endian.big});
 
+  /// Read a signed, 8-bit integer.
+  Future<int> readInt8() => read(1).then((b) => b.readInt8());
+
+  /// Read a signed, 16-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readInt16([Endian endian]) =>
+      read(2, endian: endian ?? this.endian).then((b) => b.readInt16());
+
+  /// Read a signed, 32-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readInt32([Endian endian]) =>
+      read(4, endian: endian ?? this.endian).then((b) => b.readInt32());
+
+  /// Read a signed, 64-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readInt64([Endian endian]) =>
+      read(8, endian: endian ?? this.endian).then((b) => b.readInt64());
+
+  /// Read an unsigned, 8-bit integer.
+  Future<int> readUint8() => read(1).then((b) => b.readUint8());
+
+  /// Read an unsigned, 16-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readUint16([Endian endian]) =>
+      read(2, endian: endian ?? this.endian).then((b) => b.readUint16());
+
+  /// Read an unsigned, 32-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readUint32([Endian endian]) =>
+      read(4, endian: endian ?? this.endian).then((b) => b.readUint32());
+
+  /// Read an unsigned, 64-bit integer.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<int> readUint64([Endian endian]) =>
+      read(8, endian: endian ?? this.endian).then((b) => b.readUint64());
+
+  /// Read a 32-bit, floating-point number.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<double> readFloat32([Endian endian]) =>
+      read(4, endian: endian ?? this.endian).then((b) => b.readFloat32());
+
+  /// Read a 64-bit, floating-point number.
+  ///
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<double> readFloat64([Endian endian]) =>
+      read(8, endian: endian ?? this.endian).then((b) => b.readFloat64());
+
   /// Consumes a number of bytes from the input stream (see [consume]), then returns
   /// a single [ByteDataReader] that reads the received buffer.
-  /// 
+  ///
   /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
   Future<ByteDataReader> read(int length, {bool copy: false, Endian endian}) {
-    return consume(length).then(
-        (buf) => new ByteDataReader(endian: endian ?? this.endian, copy: copy)..add(buf));
+    return consume(length).then((buf) =>
+        new ByteDataReader(endian: endian ?? this.endian, copy: copy)
+          ..add(buf));
   }
 
   /// Consumes a number of bytes from the input stream (see [consume]), then adds the read data
