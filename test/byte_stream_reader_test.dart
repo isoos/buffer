@@ -17,25 +17,25 @@ void main() {
   });
 
   test('can read buffer of smaller size', () async {
-    expect(await reader.read(3), [$H, $e, $l]);
+    expect(await reader.consume(3), [$H, $e, $l]);
   });
 
   test('can read buffer of exact size', () async {
-    expect(await reader.read(7), [$H, $e, $l, $l, $o, $comma, $space]);
+    expect(await reader.consume(7), [$H, $e, $l, $l, $o, $comma, $space]);
   });
 
   test('can read buffer of greater size', () async {
-    expect(await reader.read(10),
+    expect(await reader.consume(10),
         [$H, $e, $l, $l, $o, $comma, $space, $w, $o, $r]);
   });
 
   test('fails on reads of too large a size', () async {
-    expect(() => reader.read(1000), throwsStateError);
+    expect(() => reader.consume(1000), throwsStateError);
   });
 
   test('subsequent reads', () async {
-    expect(await reader.read(3), [$H, $e, $l]);
-    expect(await reader.read(3), [$l, $o, $comma]);
+    expect(await reader.consume(3), [$H, $e, $l]);
+    expect(await reader.consume(3), [$l, $o, $comma]);
   });
 
   group('enqueued reads', () {
@@ -51,15 +51,15 @@ void main() {
 
     test('data added after listening', () async {
       var reader = new ByteStreamReader();
-      var f = reader.read(5);
+      var f = reader.consume(5);
       data.pipe(reader);
       expect(f, completion([$f, $o, $o, $b, $a]));
     });
 
     test('subsequent reads', () async {
       var reader = new ByteStreamReader();
-      var f = reader.read(2);
-      var g = reader.read(4);
+      var f = reader.consume(2);
+      var g = reader.consume(4);
       print('g should be ${[$o, $o, $b, $a]}');
       data.pipe(reader);
       expect(f, completion([$f, $o]));
