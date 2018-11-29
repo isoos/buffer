@@ -13,12 +13,18 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
       new DoubleLinkedQueue<_ByteStreamReaderAwaiter>();
   final Queue<Uint8List> _byteQueue = new DoubleLinkedQueue<Uint8List>();
 
+  /// An [Endian] that should be used to read data of length > 1 byte from the stream.
+  final Endian endian;
+
+  ByteStreamReader({this.endian: Endian.big});
+
   /// Consumes a number of bytes from the input stream (see [consume]), then returns
   /// a single [ByteDataReader] that reads the received buffer.
-  Future<ByteDataReader> read(int length,
-      {bool copy: false, Endian endian: Endian.big}) {
+  /// 
+  /// You may provide an [endian] value to override the property set on this instance (See [ByteStreamReader].endian).
+  Future<ByteDataReader> read(int length, {bool copy: false, Endian endian}) {
     return consume(length).then(
-        (buf) => new ByteDataReader(endian: endian, copy: copy)..add(buf));
+        (buf) => new ByteDataReader(endian: endian ?? this.endian, copy: copy)..add(buf));
   }
 
   /// Consumes a number of bytes from the input stream (see [consume]), then adds the read data
