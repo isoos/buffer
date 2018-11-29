@@ -13,11 +13,9 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
       new DoubleLinkedQueue<_ByteStreamReaderAwaiter>();
   final Queue<Uint8List> _byteQueue = new DoubleLinkedQueue<Uint8List>();
 
-  static Uint8List coerceUint8List(List<int> list) {
-    return list is Uint8List ? list : new Uint8List.fromList(list);
-  }
-
-  Future<Uint8List> read(int length) {
+  /// Returns a [Future] that completes with a buffer of the given size, read
+  /// asynchronously from the incoming stream.
+  Future<Uint8List> consume(int length) {
     var trace = StackTrace.current;
     // First, check if the top of the byte queue has enough bytes.
     if (_byteQueue.isNotEmpty) {
@@ -77,7 +75,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
     // If the awaiter is full, just return its value.
     if (awaiter.remaining <= 0) {
       return new Future<Uint8List>.value(
-          coerceUint8List(awaiter.builder.takeBytes()));
+          castBytes(awaiter.builder.takeBytes()));
     }
 
     // Otherwise, enqueue it until further notice.
@@ -87,7 +85,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
 
   @override
   Future<void> addStream(Stream<List<int>> stream) {
-    return stream.map(coerceUint8List).forEach((buf) {
+    return stream.map(castBytes).forEach((buf) {
       int index = 0;
 
       // Complete any possible awaiters.
@@ -118,7 +116,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
 
         if (top.remaining == 0) {
           _awaiterQueue.removeFirst();
-          top.completer.complete(coerceUint8List(top.builder.toBytes()));
+          top.completer.complete(castBytes(top.builder.toBytes()));
           continue;
         }
 
@@ -138,7 +136,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
           // Remove the awaiter if it's completed.
           if (top.remaining == 0) {
             _awaiterQueue.removeFirst();
-            top.completer.complete(coerceUint8List(top.builder.toBytes()));
+            top.completer.complete(castBytes(top.builder.toBytes()));
           }
 
           return null;
@@ -155,7 +153,7 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
           // Remove the awaiter if it's completed.
           if (top.remaining == 0) {
             _awaiterQueue.removeFirst();
-            top.completer.complete(coerceUint8List(top.builder.toBytes()));
+            top.completer.complete(castBytes(top.builder.toBytes()));
             //print('boom');
           } else {
             buf = new Uint8List.view(buf.buffer, buf.offsetInBytes + index);
