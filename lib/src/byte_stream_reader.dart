@@ -13,6 +13,20 @@ class ByteStreamReader extends StreamConsumer<List<int>> {
       new DoubleLinkedQueue<_ByteStreamReaderAwaiter>();
   final Queue<Uint8List> _byteQueue = new DoubleLinkedQueue<Uint8List>();
 
+  /// Consumes a number of bytes from the input stream (see [consume]), then returns
+  /// a single [ByteDataReader] that reads the received buffer.
+  Future<ByteDataReader> read(int length,
+      {bool copy: false, Endian endian: Endian.big}) {
+    return consume(length).then(
+        (buf) => new ByteDataReader(endian: endian, copy: copy)..add(buf));
+  }
+
+  /// Consumes a number of bytes from the input stream (see [consume]), then adds the read data
+  /// into a [ByteDataReader].
+  Future<void> readInto(ByteDataReader reader, int length, {bool copy}) {
+    return consume(length).then((buf) => reader.add(buf, copy: copy));
+  }
+
   /// Returns a [Future] that completes with a buffer of the given size, read
   /// asynchronously from the incoming stream.
   Future<Uint8List> consume(int length) {
