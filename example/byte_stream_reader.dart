@@ -19,5 +19,14 @@ Future<Uint8List> getPayloadFrometworkPacket(Socket socket) async {
   var protocolVersion = await rdr.readUint8();
   var flags = await rdr.readUint8();
   var checksum = await rdr.readUint16();
-}
 
+  // Validate the checksum.
+  if (checksum != (protocolVersion & flags)) {
+    throw FormatException(
+        'Invalid checksum $checksum; expected ${protocolVersion & flags}.');
+  }
+
+  // Return the rest of the packet.
+  var payloadLength = await rdr.readUint64();
+  return await rdr.consume(payloadLength);
+}
