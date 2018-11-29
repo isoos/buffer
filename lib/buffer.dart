@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
+export 'src/byte_stream_reader.dart';
 
 /// Read [stream] into a String.
 Future<String> readAsString(Stream<List<int>> stream, {Encoding encoding}) {
