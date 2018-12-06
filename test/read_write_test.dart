@@ -33,4 +33,29 @@ void main() {
       expect(reader.remainingLength, 7);
     });
   });
+
+  group('ByteDataReader', () {
+    test('readAhead', () async {
+      final reader = new ByteDataReader();
+      reader.add([0]);
+      bool completed = false;
+      reader.readAhead(5).whenComplete(() {
+        completed = true;
+      });
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(completed, false);
+      reader.add([0]);
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(completed, false);
+      reader.add([0]);
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(completed, false);
+      reader.add([0]);
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(completed, false);
+      reader.add([0]);
+      await Future.delayed(Duration(milliseconds: 100));
+      expect(completed, true);
+    });
+  });
 }
