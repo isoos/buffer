@@ -1,3 +1,7 @@
+## 1.0.3
+
+- `ByteDataReader.readAhead`
+
 ## 1.0.2
 
 - `byteLength`-driven read and write methods for integers.

@@ -310,6 +310,8 @@ class ByteDataReader {
   int _offset = 0;
   int _queueTotalLength = 0;
   ByteData _data;
+  Completer _readAheadCompleter;
+  int _readAheadRequired = 0;
 
   ByteDataReader({this.endian: Endian.big, bool copy: false}) : _copy = copy;
 
@@ -354,6 +356,26 @@ class ByteDataReader {
   void add(List<int> bytes, {bool copy}) {
     _queue.add(castBytes(bytes, copy: copy ?? _copy));
     _queueTotalLength += bytes.length;
+    if (_readAheadCompleter != null && remainingLength >= _readAheadRequired) {
+      _readAheadCompleter.complete();
+      _readAheadCompleter = null;
+    }
+  }
+
+  /// Completes when minimum [length] amount of bytes are in the buffer.
+  Future readAhead(int length) {
+    if (remainingLength >= length) {
+      return new Future.value();
+    }
+    if (_readAheadCompleter != null && _readAheadRequired == length) {
+      return _readAheadCompleter.future;
+    }
+    if (_readAheadCompleter != null && _readAheadRequired != length) {
+      throw new StateError('A different readAhead is already waiting.');
+    }
+    _readAheadRequired = length;
+    _readAheadCompleter = new Completer();
+    return _readAheadCompleter.future;
   }
 
   Uint8List read(int length, {bool copy}) {
