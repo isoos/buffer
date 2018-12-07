@@ -331,23 +331,21 @@ class ByteDataReader {
       throw new StateError('Not enough bytes to read.');
     }
     _clearQueue();
-    while (_offset + required > _queue.first.length) {
+    if (_offset + required > _queue.first.length) {
+      final buffer = new BytesBuffer();
       final first = _queue.removeFirst();
       _queueTotalLength -= first.length;
-      if (_queue.isEmpty) {
-        throw new StateError('Not enough bytes to read.');
-      }
-      final remaining = first.length - _offset;
-      if (remaining > 0) {
-        final sec = _queue.removeFirst();
-        _queueTotalLength -= sec.length;
-        final buffer = new Uint8List(remaining + sec.length);
-        buffer.setRange(0, remaining, first, _offset);
-        buffer.setRange(remaining, buffer.length, sec);
-        _queue.addFirst(buffer);
-        _queueTotalLength += buffer.length;
-      }
+      buffer.add(first.buffer.asUint8List(
+          first.offsetInBytes + _offset, first.lengthInBytes - _offset));
       _offset = 0;
+      while (buffer.length < required) {
+        final next = _queue.removeFirst();
+        _queueTotalLength -= next.length;
+        buffer.add(next);
+      }
+      final merged = buffer.toBytes();
+      _queueTotalLength += merged.length;
+      _queue.addFirst(merged);
       _data = null;
     }
     _data ??= new ByteData.view(_queue.first.buffer);

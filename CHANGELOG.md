@@ -1,3 +1,7 @@
+## 1.0.5
+
+- More efficient merge in `ByteDataReader`.
+
 ## 1.0.4
 
 - Fix buffer processing bug.
