@@ -1,3 +1,7 @@
+## 1.0.4
+
+- Fix buffer processing bug.
+
 ## 1.0.3
 
 - `ByteDataReader.readAhead`

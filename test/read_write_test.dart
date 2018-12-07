@@ -35,6 +35,34 @@ void main() {
   });
 
   group('ByteDataReader', () {
+    test('single byte', () async {
+      final reader = new ByteDataReader();
+      reader.add([123]);
+      expect(reader.readUint8(), 123);
+    });
+
+    test('two bytes', () async {
+      final reader = new ByteDataReader();
+      reader.add([123, 124]);
+      expect(reader.readUint8(), 123);
+      expect(reader.readUint8(), 124);
+    });
+
+    test('two bytes in two packets', () async {
+      final reader = new ByteDataReader();
+      reader.add([123]);
+      reader.add([124]);
+      expect(reader.readUint8(), 123);
+      expect(reader.readUint8(), 124);
+    });
+
+    test('int16 from two packets', () async {
+      final reader = new ByteDataReader();
+      reader.add([123]);
+      reader.add([124]);
+      expect(reader.readUint16(), 123 * 256 + 124);
+    });
+
     test('readAhead', () async {
       final reader = new ByteDataReader();
       reader.add([0]);

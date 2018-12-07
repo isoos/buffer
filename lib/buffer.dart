@@ -327,11 +327,11 @@ class ByteDataReader {
   }
 
   void _init(int required) {
-    if (_queue.isEmpty || _queueTotalLength - _offset < required) {
+    if (remainingLength < required) {
       throw new StateError('Not enough bytes to read.');
     }
+    _clearQueue();
     while (_offset + required > _queue.first.length) {
-      _clearQueue();
       final first = _queue.removeFirst();
       _queueTotalLength -= first.length;
       if (_queue.isEmpty) {
