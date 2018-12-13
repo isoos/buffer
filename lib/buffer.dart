@@ -348,7 +348,8 @@ class ByteDataReader {
       _queue.addFirst(merged);
       _data = null;
     }
-    _data ??= new ByteData.view(_queue.first.buffer);
+    _data ??=
+        new ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
   }
 
   void add(List<int> bytes, {bool copy}) {
@@ -383,7 +384,8 @@ class ByteDataReader {
     _clearQueue();
     final shouldCopy = copy ?? _copy;
     if (!shouldCopy && (_offset + length <= _queue.first.length)) {
-      final value = new Uint8List.view(_queue.first.buffer, _offset, length);
+      final value = new Uint8List.view(
+          _queue.first.buffer, _queue.first.offsetInBytes + _offset, length);
       _offset += length;
       return value;
     }
@@ -392,7 +394,8 @@ class ByteDataReader {
       _clearQueue();
       final remaining = length - bb.length;
       if (_offset + remaining <= _queue.first.length) {
-        bb.add(new Uint8List.view(_queue.first.buffer, _offset, remaining));
+        bb.add(new Uint8List.view(_queue.first.buffer,
+            _queue.first.offsetInBytes + _offset, remaining));
         _offset += remaining;
       } else {
         final first = _queue.removeFirst();
@@ -400,7 +403,8 @@ class ByteDataReader {
         if (_offset == 0) {
           bb.add(first, copy: false);
         } else {
-          bb.add(new Uint8List.view(first.buffer, _offset));
+          bb.add(
+              new Uint8List.view(first.buffer, first.offsetInBytes + _offset));
         }
         _data = null;
         _offset = 0;

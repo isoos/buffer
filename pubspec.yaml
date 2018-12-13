@@ -2,7 +2,7 @@ name: buffer
 description: >
   Utility functions and classes to work with byte buffers and streams efficiently,
   to read and write binary data formats.
-version: 1.0.5
+version: 1.0.5+1
 homepage: https://github.com/isoos/buffer
 author: Istvan Soos <istvan.soos@gmail.com>
 

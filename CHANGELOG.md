@@ -1,3 +1,7 @@
+## 1.0.5+1
+
+- Fix `offsetInBytes` use.
+
 ## 1.0.5
 
 - More efficient merge in `ByteDataReader`.
