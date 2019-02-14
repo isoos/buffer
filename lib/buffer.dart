@@ -4,6 +4,8 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 /// Read [stream] into a String.
+///
+/// Defaults to [utf8] if no [encoding] is given.
 Future<String> readAsString(Stream<List<int>> stream, {Encoding encoding}) {
   encoding ??= utf8;
   return encoding.decodeStream(stream);
