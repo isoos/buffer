@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 
 import 'package:buffer/buffer.dart';
@@ -67,6 +68,7 @@ void main() {
       final reader = new ByteDataReader();
       reader.add([0]);
       bool completed = false;
+      // ignore: unawaited_futures
       reader.readAhead(5).whenComplete(() {
         completed = true;
       });

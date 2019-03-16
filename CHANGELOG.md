@@ -1,3 +1,7 @@
+## 1.0.6
+
+- Using `package:pedantic` as base of the lint rules.
+
 ## 1.0.5+1
 
 - Fix `offsetInBytes` use.

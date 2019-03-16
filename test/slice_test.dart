@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:buffer/buffer.dart';
 
 import 'package:test/test.dart';

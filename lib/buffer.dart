@@ -21,7 +21,7 @@ Future<String> readAsString(Stream<List<int>> stream, {Encoding encoding}) {
 Future<Uint8List> readAsBytes(
   Stream<List<int>> stream, {
   int maxLength,
-  bool copy: false,
+  bool copy = false,
 }) async {
   final bb = new BytesBuffer();
   await for (List<int> next in stream) {
@@ -45,7 +45,7 @@ Stream<Uint8List> sliceStream(
   Stream<List<int>> stream,
   int sliceLength, {
   int maxLength,
-  bool copy: false,
+  bool copy = false,
 }) async* {
   int total = 0;
   final buffer = <Uint8List>[];
@@ -91,7 +91,7 @@ Stream<Uint8List> sliceStream(
 ///
 /// When [copy] is specified, the content will be copied even if the input
 /// [bytes] are already Uint8List.
-Uint8List castBytes(List<int> bytes, {bool copy: false}) {
+Uint8List castBytes(List<int> bytes, {bool copy = false}) {
   if (bytes is Uint8List) {
     if (copy) {
       final list = new Uint8List(bytes.length);
@@ -115,11 +115,11 @@ class BytesBuffer {
   final bool _copy;
   int _length = 0;
 
-  BytesBuffer({bool copy: false})
+  BytesBuffer({bool copy = false})
       : _chunks = <Uint8List>[],
         _copy = copy;
 
-  BytesBuffer._fromChunks(this._chunks, {bool copy: false}) : _copy = copy {
+  BytesBuffer._fromChunks(this._chunks, {bool copy = false}) : _copy = copy {
     _length = _chunks.fold<int>(0, (sum, c) => sum + c.length);
   }
 
@@ -169,7 +169,7 @@ class ByteDataWriter {
   ByteData _data;
   int _offset = 0;
 
-  ByteDataWriter({this.bufferLength: 128, this.endian: Endian.big});
+  ByteDataWriter({this.bufferLength = 128, this.endian = Endian.big});
 
   void _flush() {
     if (_data != null) {
@@ -188,7 +188,7 @@ class ByteDataWriter {
     }
   }
 
-  void write(List<int> bytes, {bool copy: false}) {
+  void write(List<int> bytes, {bool copy = false}) {
     // TODO: may add to current _data buffer
     _flush();
     _bb.add(bytes, copy: copy);
@@ -315,7 +315,7 @@ class ByteDataReader {
   Completer _readAheadCompleter;
   int _readAheadRequired = 0;
 
-  ByteDataReader({this.endian: Endian.big, bool copy: false}) : _copy = copy;
+  ByteDataReader({this.endian = Endian.big, bool copy = false}) : _copy = copy;
 
   int get remainingLength => _queueTotalLength - _offset;
 
