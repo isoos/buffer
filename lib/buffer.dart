@@ -140,6 +140,12 @@ class BytesBuffer {
     add([byte]);
   }
 
+  /// Add a byte array to buffer at [index]
+  void insert(int index, List<int> bytes, {bool copy}) {
+    _chunks.insert(index, castBytes(bytes, copy: copy ?? _copy));
+    _length += bytes.length;
+  }
+
   /// Concatenate the byte arrays and return them as a single unit.
   Uint8List toBytes({bool copy}) {
     if (_chunks.length == 1 && !(copy ?? _copy)) {
