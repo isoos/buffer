@@ -318,6 +318,7 @@ class ByteDataReader {
   ByteDataReader({this.endian = Endian.big, bool copy = false}) : _copy = copy;
 
   int get remainingLength => _queueTotalLength - _offset;
+  int get offset => _offset;
 
   void _clearQueue() {
     while (_queue.isNotEmpty && _queue.first.length == _offset) {
