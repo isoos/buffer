@@ -14,12 +14,12 @@ Stream<List<int>> openBytesStream(
   } else if (source is Stream<List<int>>) {
     return source;
   } else if (source is List<int>) {
-    return new Stream.fromFuture(new Future.value(source));
+    return Stream.fromFuture(Future.value(source));
   } else if (source is File) {
     return source.openRead();
   } else if (source is String) {
-    return new Stream.fromFuture(new Future.value(utf8.encode(source)));
+    return Stream.fromFuture(Future.value(utf8.encode(source)));
   } else {
-    throw new ArgumentError('Unknown input type: ${source.runtimeType}');
+    throw ArgumentError('Unknown input type: ${source.runtimeType}');
   }
 }

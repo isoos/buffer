@@ -1,3 +1,8 @@
+## 1.0.7
+
+- Updated to modern Dart standards.
+- `ByteDataReader.offsetInBytes`.
+
 ## 1.0.6
 
 - Using `package:pedantic` as base of the lint rules.

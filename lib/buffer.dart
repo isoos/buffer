@@ -23,11 +23,11 @@ Future<Uint8List> readAsBytes(
   int maxLength,
   bool copy = false,
 }) async {
-  final bb = new BytesBuffer();
+  final bb = BytesBuffer();
   await for (List<int> next in stream) {
     bb.add(next);
     if (maxLength != null && maxLength < bb.length) {
-      throw new StateError('Max length reached: $maxLength bytes.');
+      throw StateError('Max length reached: $maxLength bytes.');
     }
   }
   return bb.toBytes();
@@ -47,14 +47,14 @@ Stream<Uint8List> sliceStream(
   int maxLength,
   bool copy = false,
 }) async* {
-  int total = 0;
+  var total = 0;
   final buffer = <Uint8List>[];
   await for (List<int> bytes in stream) {
-    Uint8List next = castBytes(bytes, copy: copy);
+    var next = castBytes(bytes, copy: copy);
 
     total += next.length;
     if (maxLength != null && maxLength < total) {
-      throw new StateError('Max length reached: $maxLength bytes.');
+      throw StateError('Max length reached: $maxLength bytes.');
     }
 
     buffer.add(next);
@@ -66,14 +66,14 @@ Stream<Uint8List> sliceStream(
       if (bufferLength > sliceLength) {
         final last = buffer.removeLast();
         final index = sliceLength - bufferLength + last.length;
-        final missing = new Uint8List(index);
+        final missing = Uint8List(index);
         missing.setRange(0, index, last);
         buffer.add(missing);
-        overflow = new Uint8List(last.length - index);
+        overflow = Uint8List(last.length - index);
         overflow.setRange(0, overflow.length, last, index);
       }
 
-      final bb = BytesBuffer._fromChunks(new List.from(buffer));
+      final bb = BytesBuffer._fromChunks(List.from(buffer));
       buffer.clear();
       if (overflow != null) {
         buffer.add(overflow);
@@ -82,7 +82,7 @@ Stream<Uint8List> sliceStream(
     }
   }
   if (buffer.isNotEmpty) {
-    final bb = new BytesBuffer._fromChunks(buffer);
+    final bb = BytesBuffer._fromChunks(buffer);
     yield bb.toBytes();
   }
 }
@@ -94,14 +94,14 @@ Stream<Uint8List> sliceStream(
 Uint8List castBytes(List<int> bytes, {bool copy = false}) {
   if (bytes is Uint8List) {
     if (copy) {
-      final list = new Uint8List(bytes.length);
+      final list = Uint8List(bytes.length);
       list.setRange(0, list.length, bytes);
       return list;
     } else {
       return bytes;
     }
   } else {
-    return new Uint8List.fromList(bytes);
+    return Uint8List.fromList(bytes);
   }
 }
 
@@ -145,9 +145,9 @@ class BytesBuffer {
     if (_chunks.length == 1 && !(copy ?? _copy)) {
       return _chunks.single;
     }
-    final list = new Uint8List(_length);
-    int offset = 0;
-    for (int i = 0; i < _chunks.length; i++) {
+    final list = Uint8List(_length);
+    var offset = 0;
+    for (var i = 0; i < _chunks.length; i++) {
       final chunk = _chunks[i];
       list.setRange(offset, offset + chunk.length, chunk);
       offset += chunk.length;
@@ -165,7 +165,7 @@ class BytesBuffer {
 class ByteDataWriter {
   int bufferLength;
   final Endian endian;
-  final _bb = new BytesBuffer();
+  final _bb = BytesBuffer();
   ByteData _data;
   int _offset = 0;
 
@@ -184,7 +184,7 @@ class ByteDataWriter {
   void _init(int required) {
     if (_data == null || _offset + required > _data.lengthInBytes) {
       _flush();
-      _data = new ByteData(bufferLength > required ? bufferLength : required);
+      _data = ByteData(bufferLength > required ? bufferLength : required);
     }
   }
 
@@ -245,7 +245,7 @@ class ByteDataWriter {
         writeInt64(value, endian);
         break;
       default:
-        throw new ArgumentError(
+        throw ArgumentError(
             'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
     }
   }
@@ -289,7 +289,7 @@ class ByteDataWriter {
         writeUint64(value, endian);
         break;
       default:
-        throw new ArgumentError(
+        throw ArgumentError(
             'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
     }
   }
@@ -307,9 +307,10 @@ class ByteDataWriter {
 /// The input arrays are concatenated as needed.
 class ByteDataReader {
   final Endian endian;
-  final _queue = new DoubleLinkedQueue<Uint8List>();
+  final _queue = DoubleLinkedQueue<Uint8List>();
   final bool _copy;
   int _offset = 0;
+  int _queueCurrentLength = 0;
   int _queueTotalLength = 0;
   ByteData _data;
   Completer _readAheadCompleter;
@@ -317,12 +318,16 @@ class ByteDataReader {
 
   ByteDataReader({this.endian = Endian.big, bool copy = false}) : _copy = copy;
 
-  int get remainingLength => _queueTotalLength - _offset;
+  /// The number of bytes available to read.
+  int get remainingLength => _queueCurrentLength - _offset;
+
+  /// The offset in bytes (the current position).
+  int get offsetInBytes => _queueTotalLength - remainingLength;
 
   void _clearQueue() {
     while (_queue.isNotEmpty && _queue.first.length == _offset) {
       final first = _queue.removeFirst();
-      _queueTotalLength -= first.length;
+      _queueCurrentLength -= first.length;
       _offset = 0;
       _data = null;
     }
@@ -330,32 +335,32 @@ class ByteDataReader {
 
   void _init(int required) {
     if (remainingLength < required) {
-      throw new StateError('Not enough bytes to read.');
+      throw StateError('Not enough bytes to read.');
     }
     _clearQueue();
     if (_offset + required > _queue.first.length) {
-      final buffer = new BytesBuffer();
+      final buffer = BytesBuffer();
       final first = _queue.removeFirst();
-      _queueTotalLength -= first.length;
+      _queueCurrentLength -= first.length;
       buffer.add(first.buffer.asUint8List(
           first.offsetInBytes + _offset, first.lengthInBytes - _offset));
       _offset = 0;
       while (buffer.length < required) {
         final next = _queue.removeFirst();
-        _queueTotalLength -= next.length;
+        _queueCurrentLength -= next.length;
         buffer.add(next);
       }
       final merged = buffer.toBytes();
-      _queueTotalLength += merged.length;
+      _queueCurrentLength += merged.length;
       _queue.addFirst(merged);
       _data = null;
     }
-    _data ??=
-        new ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
+    _data ??= ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
   }
 
   void add(List<int> bytes, {bool copy}) {
     _queue.add(castBytes(bytes, copy: copy ?? _copy));
+    _queueCurrentLength += bytes.length;
     _queueTotalLength += bytes.length;
     if (_readAheadCompleter != null && remainingLength >= _readAheadRequired) {
       _readAheadCompleter.complete();
@@ -366,47 +371,46 @@ class ByteDataReader {
   /// Completes when minimum [length] amount of bytes are in the buffer.
   Future readAhead(int length) {
     if (remainingLength >= length) {
-      return new Future.value();
+      return Future.value();
     }
     if (_readAheadCompleter != null && _readAheadRequired == length) {
       return _readAheadCompleter.future;
     }
     if (_readAheadCompleter != null && _readAheadRequired != length) {
-      throw new StateError('A different readAhead is already waiting.');
+      throw StateError('A different readAhead is already waiting.');
     }
     _readAheadRequired = length;
-    _readAheadCompleter = new Completer();
+    _readAheadCompleter = Completer();
     return _readAheadCompleter.future;
   }
 
   Uint8List read(int length, {bool copy}) {
-    if (_queue.isEmpty || _queueTotalLength - _offset < length) {
-      throw new StateError('Not enough bytes to read.');
+    if (_queue.isEmpty || _queueCurrentLength - _offset < length) {
+      throw StateError('Not enough bytes to read.');
     }
     _clearQueue();
     final shouldCopy = copy ?? _copy;
     if (!shouldCopy && (_offset + length <= _queue.first.length)) {
-      final value = new Uint8List.view(
+      final value = Uint8List.view(
           _queue.first.buffer, _queue.first.offsetInBytes + _offset, length);
       _offset += length;
       return value;
     }
-    final bb = new BytesBuffer(copy: copy ?? _copy);
+    final bb = BytesBuffer(copy: copy ?? _copy);
     while (bb.length < length) {
       _clearQueue();
       final remaining = length - bb.length;
       if (_offset + remaining <= _queue.first.length) {
-        bb.add(new Uint8List.view(_queue.first.buffer,
+        bb.add(Uint8List.view(_queue.first.buffer,
             _queue.first.offsetInBytes + _offset, remaining));
         _offset += remaining;
       } else {
         final first = _queue.removeFirst();
-        _queueTotalLength -= first.length;
+        _queueCurrentLength -= first.length;
         if (_offset == 0) {
           bb.add(first, copy: false);
         } else {
-          bb.add(
-              new Uint8List.view(first.buffer, first.offsetInBytes + _offset));
+          bb.add(Uint8List.view(first.buffer, first.offsetInBytes + _offset));
         }
         _data = null;
         _offset = 0;
@@ -468,7 +472,7 @@ class ByteDataReader {
       case 8:
         return readInt64(endian);
       default:
-        throw new ArgumentError(
+        throw ArgumentError(
             'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
     }
   }
@@ -512,7 +516,7 @@ class ByteDataReader {
       case 8:
         return readUint64(endian);
       default:
-        throw new ArgumentError(
+        throw ArgumentError(
             'byteLength ($byteLength) must be one of [1, 2, 4, 8].');
     }
   }

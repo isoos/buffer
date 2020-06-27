@@ -7,13 +7,13 @@ import 'package:test/test.dart';
 void main() {
   group('A group of tests', () {
     test('empty', () async {
-      final stream = sliceStream(new Stream.empty(), 10);
+      final stream = sliceStream(Stream.empty(), 10);
       expect(await stream.toList(), []);
     });
 
     test('smaller', () async {
       final stream = sliceStream(
-          new Stream.fromIterable([
+          Stream.fromIterable([
             [0, 1, 2],
           ]),
           10);
@@ -23,11 +23,11 @@ void main() {
     });
 
     test('big bang', () async {
-      int num = 0;
+      var num = 0;
       final stream = sliceStream(
-          new Stream.fromIterable(new List.generate(
+          Stream.fromIterable(List.generate(
             13,
-            (i) => new List.generate(i + 1, (i) => num++),
+            (i) => List.generate(i + 1, (i) => num++),
           )),
           5);
       expect(await stream.toList(), [
