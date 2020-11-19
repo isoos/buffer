@@ -1,7 +1,8 @@
 ## 1.1.0-nullsafety.0
 
-- Updated to nullsafety, no changes to external api
-  
+- Updated to null safety, no changes to external API.
+  ([#6](https://github.com/isoos/buffer/pull/6) thanks to [TimWhiting](https://github.com/TimWhiting))
+
 ## 1.0.7
 
 - Updated to modern Dart standards.
