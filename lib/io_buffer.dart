@@ -8,10 +8,8 @@ import 'dart:io';
 /// - File (will call openRead())
 /// - String (will call utf8.encode())
 Stream<List<int>> openBytesStream(
-    /* String | List<int> | File | Stream<List<int>> */ source) {
-  if (source == null) {
-    return null;
-  } else if (source is Stream<List<int>>) {
+    /* String | List<int> | File | Stream<List<int>> */ Object source) {
+  if (source is Stream<List<int>>) {
     return source;
   } else if (source is List<int>) {
     return Stream.fromFuture(Future.value(source));
