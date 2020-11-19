@@ -1,4 +1,4 @@
-## 2.0.0-nullsafety.0
+## 1.1.0-nullsafety.0
 
 - Updated to nullsafety, no changes to external api
   

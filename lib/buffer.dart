@@ -166,15 +166,26 @@ class ByteDataWriter {
   int bufferLength;
   final Endian endian;
   final _bb = BytesBuffer();
-  ByteData? _data;
+  bool _dataEmpty = true;
+  ByteData __data = ByteData(0);
+  ByteData get _data => __data;
+  set _data(ByteData? data) {
+    if (data == null) {
+      _dataEmpty = true;
+      return;
+    }
+    __data = data;
+    _dataEmpty = false;
+  }
+
   int _offset = 0;
 
   ByteDataWriter({this.bufferLength = 128, this.endian = Endian.big});
 
   void _flush() {
-    if (_data != null) {
+    if (!_dataEmpty) {
       if (_offset > 0) {
-        _bb.add(_data!.buffer.asUint8List(0, _offset));
+        _bb.add(_data.buffer.asUint8List(0, _offset));
       }
       _data = null;
       _offset = 0;
@@ -182,7 +193,7 @@ class ByteDataWriter {
   }
 
   void _init(int required) {
-    if (_data == null || _offset + required > _data!.lengthInBytes) {
+    if (_dataEmpty || _offset + required > _data.lengthInBytes) {
       _flush();
       _data = ByteData(bufferLength > required ? bufferLength : required);
     }
@@ -196,37 +207,37 @@ class ByteDataWriter {
 
   void writeFloat32(double value, [Endian? endian]) {
     _init(4);
-    _data!.setFloat32(_offset, value, endian ?? this.endian);
+    _data.setFloat32(_offset, value, endian ?? this.endian);
     _offset += 4;
   }
 
   void writeFloat64(double value, [Endian? endian]) {
     _init(8);
-    _data!.setFloat64(_offset, value, endian ?? this.endian);
+    _data.setFloat64(_offset, value, endian ?? this.endian);
     _offset += 8;
   }
 
   void writeInt8(int value) {
     _init(1);
-    _data!.setInt8(_offset, value);
+    _data.setInt8(_offset, value);
     _offset++;
   }
 
   void writeInt16(int value, [Endian? endian]) {
     _init(2);
-    _data!.setInt16(_offset, value, endian ?? this.endian);
+    _data.setInt16(_offset, value, endian ?? this.endian);
     _offset += 2;
   }
 
   void writeInt32(int value, [Endian? endian]) {
     _init(4);
-    _data!.setInt32(_offset, value, endian ?? this.endian);
+    _data.setInt32(_offset, value, endian ?? this.endian);
     _offset += 4;
   }
 
   void writeInt64(int value, [Endian? endian]) {
     _init(8);
-    _data!.setInt64(_offset, value, endian ?? this.endian);
+    _data.setInt64(_offset, value, endian ?? this.endian);
     _offset += 8;
   }
 
@@ -252,25 +263,25 @@ class ByteDataWriter {
 
   void writeUint8(int value) {
     _init(1);
-    _data!.setUint8(_offset, value);
+    _data.setUint8(_offset, value);
     _offset++;
   }
 
   void writeUint16(int value, [Endian? endian]) {
     _init(2);
-    _data!.setUint16(_offset, value, endian ?? this.endian);
+    _data.setUint16(_offset, value, endian ?? this.endian);
     _offset += 2;
   }
 
   void writeUint32(int value, [Endian? endian]) {
     _init(4);
-    _data!.setUint32(_offset, value, endian ?? this.endian);
+    _data.setUint32(_offset, value, endian ?? this.endian);
     _offset += 4;
   }
 
   void writeUint64(int value, [Endian? endian]) {
     _init(8);
-    _data!.setUint64(_offset, value, endian ?? this.endian);
+    _data.setUint64(_offset, value, endian ?? this.endian);
     _offset += 8;
   }
 
@@ -312,7 +323,18 @@ class ByteDataReader {
   int _offset = 0;
   int _queueCurrentLength = 0;
   int _queueTotalLength = 0;
-  ByteData? _data;
+  bool _dataEmpty = true;
+  ByteData __data = ByteData(0);
+  ByteData get _data => __data;
+  set _data(ByteData? data) {
+    if (data == null) {
+      _dataEmpty = true;
+      return;
+    }
+    __data = data;
+    _dataEmpty = false;
+  }
+
   Completer? _readAheadCompleter;
   int _readAheadRequired = 0;
 
@@ -329,7 +351,7 @@ class ByteDataReader {
       final first = _queue.removeFirst();
       _queueCurrentLength -= first.length;
       _offset = 0;
-      _data = null;
+      _dataEmpty = true;
     }
   }
 
@@ -355,7 +377,9 @@ class ByteDataReader {
       _queue.addFirst(merged);
       _data = null;
     }
-    _data ??= ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
+    if (_dataEmpty) {
+      _data = ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
+    }
   }
 
   void add(List<int> bytes, {bool? copy}) {
@@ -421,42 +445,42 @@ class ByteDataReader {
 
   double readFloat32([Endian? endian]) {
     _init(4);
-    final value = _data!.getFloat32(_offset, endian ?? this.endian);
+    final value = _data.getFloat32(_offset, endian ?? this.endian);
     _offset += 4;
     return value;
   }
 
   double readFloat64([Endian? endian]) {
     _init(8);
-    final value = _data!.getFloat64(_offset, endian ?? this.endian);
+    final value = _data.getFloat64(_offset, endian ?? this.endian);
     _offset += 8;
     return value;
   }
 
   int readInt8() {
     _init(1);
-    final value = _data!.getInt8(_offset);
+    final value = _data.getInt8(_offset);
     _offset += 1;
     return value;
   }
 
   int readInt16([Endian? endian]) {
     _init(2);
-    final value = _data!.getInt16(_offset, endian ?? this.endian);
+    final value = _data.getInt16(_offset, endian ?? this.endian);
     _offset += 2;
     return value;
   }
 
   int readInt32([Endian? endian]) {
     _init(4);
-    final value = _data!.getInt32(_offset, endian ?? this.endian);
+    final value = _data.getInt32(_offset, endian ?? this.endian);
     _offset += 4;
     return value;
   }
 
   int readInt64([Endian? endian]) {
     _init(8);
-    final value = _data!.getInt64(_offset, endian ?? this.endian);
+    final value = _data.getInt64(_offset, endian ?? this.endian);
     _offset += 8;
     return value;
   }
@@ -479,28 +503,28 @@ class ByteDataReader {
 
   int readUint8() {
     _init(1);
-    final value = _data!.getUint8(_offset);
+    final value = _data.getUint8(_offset);
     _offset += 1;
     return value;
   }
 
   int readUint16([Endian? endian]) {
     _init(2);
-    final value = _data!.getUint16(_offset, endian ?? this.endian);
+    final value = _data.getUint16(_offset, endian ?? this.endian);
     _offset += 2;
     return value;
   }
 
   int readUint32([Endian? endian]) {
     _init(4);
-    final value = _data!.getUint32(_offset, endian ?? this.endian);
+    final value = _data.getUint32(_offset, endian ?? this.endian);
     _offset += 4;
     return value;
   }
 
   int readUint64([Endian? endian]) {
     _init(8);
-    final value = _data!.getUint64(_offset, endian ?? this.endian);
+    final value = _data.getUint64(_offset, endian ?? this.endian);
     _offset += 8;
     return value;
   }
