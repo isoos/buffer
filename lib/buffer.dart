@@ -172,6 +172,7 @@ class ByteDataWriter {
   set _data(ByteData? data) {
     if (data == null) {
       _dataEmpty = true;
+      __data = ByteData(0);
       return;
     }
     __data = data;
@@ -329,6 +330,7 @@ class ByteDataReader {
   set _data(ByteData? data) {
     if (data == null) {
       _dataEmpty = true;
+      __data = ByteData(0);
       return;
     }
     __data = data;
@@ -351,7 +353,7 @@ class ByteDataReader {
       final first = _queue.removeFirst();
       _queueCurrentLength -= first.length;
       _offset = 0;
-      _dataEmpty = true;
+      _data = null;
     }
   }
 
