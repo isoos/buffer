@@ -7,7 +7,7 @@ import 'dart:io';
 /// - List<int> (memory buffer)
 /// - File (will call openRead())
 /// - String (will call utf8.encode())
-Stream<List<int>> openBytesStream(
+Stream<List<int>>? openBytesStream(
     /* String | List<int> | File | Stream<List<int>> */ source) {
   if (source == null) {
     return null;
