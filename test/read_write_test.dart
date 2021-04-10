@@ -106,5 +106,15 @@ void main() {
         expect(reader.offsetInBytes, expected);
       }
     });
+
+    // See https://github.com/isoos/buffer/issues/7
+    test('read zero bytes from end of buffer', () {
+      final reader = ByteDataReader();
+      reader.add([0,0,0,0]);
+      final strLen = reader.readUint32();
+      expect(strLen, equals(0));
+      var noBytes = reader.read(strLen);
+      expect(noBytes.length, equals(0));
+    });
   });
 }

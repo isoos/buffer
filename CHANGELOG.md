@@ -1,3 +1,7 @@
+## 1.1.1
+
+- Bug fix. No changes to external API.
+
 ## 1.1.0
 
 - Final null-safe release.
