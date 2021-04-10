@@ -1,6 +1,7 @@
 ## 1.1.1
 
-- Bug fix. No changes to external API.
+- Fixed bug related to zero byte read at end of buffer.
+  ([#8](https://github.com/isoos/buffer/pull/8) thanks to [adrianboyko](https://github.com/adrianboyko))
 
 ## 1.1.0
 
