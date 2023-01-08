@@ -1,3 +1,7 @@
+## 1.2.0
+
+- Perfomance optimizations. (Thanks to [insinfo]()https://github.com/insinfo))
+
 ## 1.1.1
 
 - Fixed bug related to zero byte read at end of buffer.

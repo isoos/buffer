@@ -3,6 +3,8 @@ import 'dart:collection';
 import 'dart:convert';
 import 'dart:typed_data';
 
+final _emptyData = ByteData(0);
+
 /// Read [stream] into a String.
 ///
 /// Defaults to [utf8] if no [encoding] is given.
@@ -165,36 +167,25 @@ class BytesBuffer {
 class ByteDataWriter {
   int bufferLength;
   final Endian endian;
-  final _bb = BytesBuffer();
-  bool _dataEmpty = true;
-  ByteData __data = ByteData(0);
-  ByteData get _data => __data;
-  set _data(ByteData? data) {
-    if (data == null) {
-      _dataEmpty = true;
-      __data = ByteData(0);
-      return;
-    }
-    __data = data;
-    _dataEmpty = false;
-  }
-
+  BytesBuffer? _bb;
+  ByteData _data = _emptyData;
   int _offset = 0;
 
   ByteDataWriter({this.bufferLength = 128, this.endian = Endian.big});
 
   void _flush() {
-    if (!_dataEmpty) {
+    if (_data != _emptyData) {
       if (_offset > 0) {
-        _bb.add(_data.buffer.asUint8List(0, _offset));
+        _bb ??= BytesBuffer();
+        _bb!.add(_data.buffer.asUint8List(0, _offset));
       }
-      _data = null;
+      _data = _emptyData;
       _offset = 0;
     }
   }
 
   void _init(int required) {
-    if (_dataEmpty || _offset + required > _data.lengthInBytes) {
+    if (_data == _emptyData || _offset + required > _data.lengthInBytes) {
       _flush();
       _data = ByteData(bufferLength > required ? bufferLength : required);
     }
@@ -203,7 +194,8 @@ class ByteDataWriter {
   void write(List<int> bytes, {bool copy = false}) {
     // TODO: may add to current _data buffer
     _flush();
-    _bb.add(bytes, copy: copy);
+    _bb ??= BytesBuffer();
+    _bb!.add(bytes, copy: copy);
   }
 
   void writeFloat32(double value, [Endian? endian]) {
@@ -308,8 +300,11 @@ class ByteDataWriter {
 
   /// Concatenate the byte arrays and return them as a single unit.
   Uint8List toBytes() {
+    if (_bb == null) {
+      return _data.buffer.asUint8List(0, _offset);
+    }
     _flush();
-    return _bb.toBytes();
+    return _bb?.toBytes() ?? _emptyData.buffer.asUint8List();
   }
 }
 
@@ -324,18 +319,7 @@ class ByteDataReader {
   int _offset = 0;
   int _queueCurrentLength = 0;
   int _queueTotalLength = 0;
-  bool _dataEmpty = true;
-  ByteData __data = ByteData(0);
-  ByteData get _data => __data;
-  set _data(ByteData? data) {
-    if (data == null) {
-      _dataEmpty = true;
-      __data = ByteData(0);
-      return;
-    }
-    __data = data;
-    _dataEmpty = false;
-  }
+  ByteData _data = _emptyData;
 
   Completer? _readAheadCompleter;
   int _readAheadRequired = 0;
@@ -353,7 +337,7 @@ class ByteDataReader {
       final first = _queue.removeFirst();
       _queueCurrentLength -= first.length;
       _offset = 0;
-      _data = null;
+      _data = _emptyData;
     }
   }
 
@@ -377,9 +361,9 @@ class ByteDataReader {
       final merged = buffer.toBytes();
       _queueCurrentLength += merged.length;
       _queue.addFirst(merged);
-      _data = null;
+      _data = _emptyData;
     }
-    if (_dataEmpty) {
+    if (_data == _emptyData) {
       _data = ByteData.view(_queue.first.buffer, _queue.first.offsetInBytes);
     }
   }
@@ -441,7 +425,7 @@ class ByteDataReader {
         } else {
           bb.add(Uint8List.view(first.buffer, first.offsetInBytes + _offset));
         }
-        _data = null;
+        _data = _emptyData;
         _offset = 0;
       }
     }
