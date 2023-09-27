@@ -414,20 +414,67 @@ class ByteDataReader {
       _clearQueue();
       final remaining = length - bb.length;
       if (_offset + remaining <= _queue.first.length) {
-        bb.add(Uint8List.view(_queue.first.buffer,
-            _queue.first.offsetInBytes + _offset, remaining));
-        _offset += remaining;
+        _addNextBytesToBuffer(bb, remaining);
       } else {
-        final first = _queue.removeFirst();
-        _queueCurrentLength -= first.length;
-        if (_offset == 0) {
-          bb.add(first, copy: false);
-        } else {
-          bb.add(Uint8List.view(first.buffer, first.offsetInBytes + _offset));
-        }
-        _data = _emptyData;
-        _offset = 0;
+        _removeFirstQueueItemAddToBuffer(bb);
       }
+    }
+    return bb.toBytes();
+  }
+
+  void _addNextBytesToBuffer(BytesBuffer bb, int amount) {
+    bb.add(Uint8List.view(
+        _queue.first.buffer, _queue.first.offsetInBytes + _offset, amount));
+    _offset += amount;
+  }
+
+  void _removeFirstQueueItemAddToBuffer(BytesBuffer bb) {
+    final first = _queue.removeFirst();
+    _queueCurrentLength -= first.length;
+    if (_offset == 0) {
+      bb.add(first, copy: false);
+    } else {
+      bb.add(Uint8List.view(first.buffer, first.offsetInBytes + _offset));
+    }
+    _data = _emptyData;
+    _offset = 0;
+  }
+
+  /// Reads the buffer until the terminating [value] is reached
+  /// (e.g. null-terminated bytes).
+  ///
+  /// When [include] is set, the returned [Uint8List] will also contain the
+  /// terminating [value], otherwise it is left out.
+  ///
+  /// Throws [StateError] when [value] is not yet present in the buffer.
+  Uint8List readUntilTerminatingByte(
+    int value, {
+    bool? copy,
+    bool include = false,
+  }) {
+    final bb = BytesBuffer(copy: copy ?? _copy);
+    while (true) {
+      _clearQueue();
+      if (_queue.isEmpty) {
+        if (bb.length > 0) {
+          _queue.add(bb.toBytes());
+        }
+        throw StateError('Not enough bytes to read.');
+      }
+      final index = _queue.first.indexOf(value, _offset);
+      if (index < 0) {
+        _removeFirstQueueItemAddToBuffer(bb);
+        continue;
+      } else {
+        final amount = include ? index + 1 : index;
+        if (amount > 0) {
+          _addNextBytesToBuffer(bb, amount);
+        }
+        break;
+      }
+    }
+    if (!include) {
+      _offset++;
     }
     return bb.toBytes();
   }

@@ -2,11 +2,11 @@ name: buffer
 description: >
   Utility functions and classes to work with byte buffers and streams efficiently,
   to read and write binary data formats.
-version: 1.2.0
+version: 1.2.1
 homepage: https://github.com/isoos/buffer
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.12.0 <4.0.0"
 
 #dependencies:
 #  path: ^1.4.1

@@ -116,5 +116,28 @@ void main() {
       var noBytes = reader.read(strLen);
       expect(noBytes.length, equals(0));
     });
+
+    test('read null terminated bytes', () {
+      final reader = ByteDataReader();
+      reader
+        ..add([1])
+        ..add([0])
+        ..add([2, 0, 3])
+        ..add([3, 0]);
+      expect(reader.readUntilTerminatingByte(0), [1]);
+      expect(reader.readUntilTerminatingByte(0, include: true), [2, 0]);
+      expect(reader.readUntilTerminatingByte(0), [3, 3]);
+      expect(reader.remainingLength, 0);
+    });
+
+    test('fail to read null terminated bytes', () {
+      final reader = ByteDataReader();
+      reader
+        ..add([1])
+        ..add([2, 2]);
+      expect(() => reader.readUntilTerminatingByte(0), throwsStateError);
+      reader.add([0]);
+      expect(reader.readUntilTerminatingByte(0), [1, 2, 2]);
+    });
   });
 }

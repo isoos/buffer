@@ -1,3 +1,7 @@
+## 1.2.1
+
+- Support for efficiently reading null-terminated bytes.
+
 ## 1.2.0
 
 - Perfomance optimizations. (Thanks to [insinfo]()https://github.com/insinfo))
