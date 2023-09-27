@@ -466,7 +466,7 @@ class ByteDataReader {
         _removeFirstQueueItemAddToBuffer(bb);
         continue;
       } else {
-        final amount = include ? index + 1 : index;
+        final amount = (include ? index + 1 : index) - _offset;
         if (amount > 0) {
           _addNextBytesToBuffer(bb, amount);
         }

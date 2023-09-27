@@ -1,3 +1,7 @@
+## 1.2.2
+
+- Fix bug on duplicate null-terminated bytes.
+
 ## 1.2.1
 
 - Support for efficiently reading null-terminated bytes.

@@ -123,10 +123,11 @@ void main() {
         ..add([1])
         ..add([0])
         ..add([2, 0, 3])
-        ..add([3, 0]);
+        ..add([3, 0, 0]);
       expect(reader.readUntilTerminatingByte(0), [1]);
       expect(reader.readUntilTerminatingByte(0, include: true), [2, 0]);
       expect(reader.readUntilTerminatingByte(0), [3, 3]);
+      expect(reader.readUntilTerminatingByte(0), []);
       expect(reader.remainingLength, 0);
     });
 
