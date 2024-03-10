@@ -12,3 +12,4 @@ doc/api/
 
 # IDE
 *.iml
+.idea/
