@@ -1,3 +1,7 @@
+## 1.2.3
+
+- Updated example, lints and pubspec content.
+
 ## 1.2.2
 
 - Fix bug on duplicate null-terminated bytes.
